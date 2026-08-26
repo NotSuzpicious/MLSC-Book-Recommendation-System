@@ -29,3 +29,9 @@ data/processed/
 # Operating system
 .DS_Store
 Thumbs.db
+
+# Raw datasets
+data/raw/
+
+# Processed/generated datasets
+data/processed/
