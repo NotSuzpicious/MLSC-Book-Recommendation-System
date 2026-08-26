@@ -10,6 +10,11 @@ from app.recommendation.collaborative import (
     recommend_for_user,
 )
 
+from app.fuzzy.fuzzy_recommender import (
+    create_fuzzy_system,
+    evaluate_fuzzy_recommendation,
+)
+
 from app.recommendation.content_based import (
     build_content_features,
     create_tfidf_matrix,
@@ -147,7 +152,21 @@ def calculate_hybrid_scores(
 
     return hybrid_results
 
+def normalize_value(value, maximum):
+    if maximum <= 0:
+        return 0.0
+
+    normalized = (
+        np.log1p(value)
+        / np.log1p(maximum)
+    )
+
+    return min(float(normalized), 1.0)
+
 def main():
+
+    final_results = []
+
     parser = argparse.ArgumentParser(
         description="Hybrid book recommender"
     )
@@ -223,32 +242,101 @@ def main():
         content_weight=0.3
     )
 
-    print(f"\nHybrid Recommendations for User {sample_user}")
-    print("=" * 90)
+    max_interactions = book_features[
+        "Interaction-Count"
+    ].max()
 
+    max_rating_count = book_features[
+        "Explicit-Rating-Count"
+    ].max()
+
+    (
+        personal_relevance_var,
+        popularity_var,
+        rating_confidence_var,
+        recommendation_score_var,
+        fuzzy_simulation
+    ) = create_fuzzy_system()
+
+    
     for (
         isbn,
         predicted_rating,
         content_score,
         hybrid_score,
         support
-    ) in hybrid_results[:10]:
+    ) in hybrid_results:
+
+        feature_info = book_features[
+            book_features["ISBN"] == isbn
+        ]
+
+        if feature_info.empty:
+            continue
+
+        interaction_count = feature_info.iloc[0]["Interaction-Count"]
+        explicit_rating_count = feature_info.iloc[0]["Explicit-Rating-Count"]
+
+        popularity_score = normalize_value(
+            interaction_count,
+            max_interactions
+        )
+
+        confidence_score = normalize_value(
+            explicit_rating_count,
+            max_rating_count
+        )
+
+        fuzzy_score = evaluate_fuzzy_recommendation(
+            fuzzy_simulation,
+            personal_relevance=hybrid_score,
+            popularity=popularity_score,
+            rating_confidence=confidence_score
+        )
+
+        final_results.append(
+            (
+                isbn,
+                hybrid_score,
+                popularity_score,
+                confidence_score,
+                fuzzy_score
+            )
+        )
+
+    final_results.sort(
+        key=lambda x: x[4],
+        reverse=True
+    )
+
+    print(f"\nFinal Fuzzy Recommendations for User {sample_user}")
+    print("=" * 90)
+
+    for (
+        isbn,
+        hybrid_score,
+        popularity_score,
+        confidence_score,
+        fuzzy_score
+    ) in final_results[:10]:
 
         book_info = books[
             books["ISBN"] == isbn
         ]
 
-        if not book_info.empty:
-            title = book_info.iloc[0]["Book-Title"]
-            author = book_info.iloc[0]["Book-Author"]
+        if book_info.empty:
+            continue
 
-            print(
-                f"{title} | {author} | "
-                f"CF: {predicted_rating:.2f} | "
-                f"Content: {content_score:.3f} | "
-                f"Hybrid: {hybrid_score:.3f} | "
-                f"Support: {support}"
-            )
+        title = book_info.iloc[0]["Book-Title"]
+        author = book_info.iloc[0]["Book-Author"]
+
+        print(
+            f"{title} | {author} | "
+            f"Hybrid: {hybrid_score:.3f} | "
+            f"Popularity: {popularity_score:.3f} | "
+            f"Confidence: {confidence_score:.3f} | "
+            f"Fuzzy Score: {fuzzy_score:.2f}"
+        )
 
 
 if __name__ == "__main__":
