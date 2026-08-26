@@ -1,0 +1,37 @@
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# IDE
+.vscode/
+.idea/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Generated models
+models/*.pkl
+models/*.joblib
+
+# Processed data
+data/processed/
+
+# Temporary files
+*.log
+*.tmp
+
+# Operating system
+.DS_Store
+Thumbs.db
+
+# Raw datasets
+data/raw/
+
+# Processed/generated datasets
+data/processed/
