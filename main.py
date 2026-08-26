@@ -1,4 +1,9 @@
 import argparse
+from app.services.recommendation_service import (
+    prepare_recommendation_system,
+    get_recommendations_for_user,
+    get_fallback_recommendations,
+)
 
 from app.services.recommendation_service import (
     prepare_recommendation_system,
@@ -54,6 +59,23 @@ def main():
             f"No personalized recommendations are available "
             f"for User {args.user}."
         )
+
+        print("\nShowing popular books instead:")
+        print("=" * 80)
+
+        fallback = get_fallback_recommendations(
+            book_features,
+            top_n=args.top
+        )
+
+        for rank, item in enumerate(fallback, start=1):
+            print(
+                f"{rank}. "
+                f"{item['Book-Title']} | "
+                f"{item['Book-Author']} | "
+                f"Rating: {item['Average-Rating']:.2f}"
+            )
+
         return
 
     print(f"\nRecommendations for User {args.user}")

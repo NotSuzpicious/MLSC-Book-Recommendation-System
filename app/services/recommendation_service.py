@@ -18,6 +18,32 @@ from app.fuzzy.fuzzy_recommender import (
 )
 
 import numpy as np
+from app.recommendation.popularity import recommend_popular_books
+
+def get_fallback_recommendations(
+    book_features,
+    top_n=10
+):
+    popular_books = recommend_popular_books(
+        book_features,
+        top_n=top_n,
+        min_ratings=50
+    )
+
+    results = []
+
+    for _, row in popular_books.iterrows():
+        results.append(
+            {
+                "ISBN": row["ISBN"],
+                "Book-Title": row["Book-Title"],
+                "Book-Author": row["Book-Author"],
+                "Average-Rating": row["Average-Rating"],
+                "Explicit-Rating-Count": row["Explicit-Rating-Count"],
+            }
+        )
+
+    return results
 
 def normalize_value(value, maximum):
     if maximum <= 0:
@@ -203,6 +229,21 @@ def main():
             f"{item['Book-Title']} | "
             f"{item['Book-Author']} | "
             f"Fuzzy Score: {item['Fuzzy-Score']:.2f}"
+        )
+
+        fallback = get_fallback_recommendations(
+            book_features,
+            top_n=5
+        )
+
+    print("\nFallback Recommendations")
+    print("=" * 70)
+
+    for item in fallback:
+        print(
+            f"{item['Book-Title']} | "
+            f"{item['Book-Author']} | "
+            f"Rating: {item['Average-Rating']:.2f}"
         )
 
 if __name__ == "__main__":
