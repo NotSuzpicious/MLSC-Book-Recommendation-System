@@ -61,12 +61,79 @@ st.divider()
 page = st.sidebar.radio(
     "Select Module",
     [
+        "Project Overview",
         "Book Recommendations",
         "Procurement Optimization"
     ]
 )
+if page == "Project Overview":
 
-if page == "Book Recommendations":
+    st.subheader("System Overview")
+
+    st.write(
+        "The Smart Library Recommendation and Resource Allocation "
+        "System combines machine learning and soft computing "
+        "techniques to support both readers and library administrators."
+    )
+
+    col1, col2 = st.columns(2)
+
+    with col1:
+        st.markdown("### 📚 Book Recommendation")
+        st.write(
+            "Generates personalized book recommendations using "
+            "collaborative filtering, content-based filtering, "
+            "hybrid ranking, and fuzzy logic."
+        )
+
+    with col2:
+        st.markdown("### ⚙️ Resource Allocation")
+        st.write(
+            "Uses a Genetic Algorithm to select high-value books "
+            "for library procurement while operating under a "
+            "limited budget."
+        )
+
+    st.divider()
+
+    st.markdown("### Techniques Used")
+
+    st.divider()
+
+    st.markdown("### Model Evaluation")
+
+    col1, col2, col3 = st.columns(3)
+
+    col1.metric(
+        "Personalized Hit Rate@10",
+        "22.90%"
+    )
+
+    col2.metric(
+        "CF Prediction Coverage",
+        "19.91%"
+    )
+
+    col3.metric(
+        "Recommendation Coverage",
+        "36.60%"
+    )
+
+    st.caption(
+        "Popularity baseline Hit Rate@10: 3.10% | "
+        "Collaborative Filtering MAE: 1.6151 | "
+        "RMSE: 2.1558"
+    )
+
+    st.write(
+        "• Collaborative Filtering  \n"
+        "• Content-Based Filtering  \n"
+        "• Hybrid Recommendation  \n"
+        "• Fuzzy Logic  \n"
+        "• Genetic Algorithm"
+    )
+
+elif page == "Book Recommendations":
 
     st.subheader("Personalized Book Recommendation")
 
