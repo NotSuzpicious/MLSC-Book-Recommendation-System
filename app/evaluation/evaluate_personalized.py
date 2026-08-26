@@ -61,6 +61,8 @@ def evaluate_hit_rate(
         "Users-Evaluated": users_evaluated,
         "Users-Without-Recommendations":
             users_without_recommendations,
+        "Total-Test-Users": 
+            test_data["User-ID"].nunique(),
         "Hit-Rate": hits / users_evaluated
     }
 
@@ -120,6 +122,16 @@ def main():
         print(
             f"Hit Rate@10: "
             f"{results['Hit-Rate']:.2%}"
+        )
+
+        coverage = (
+            results["Users-Evaluated"]
+            / results["Total-Test-Users"]
+        )
+
+        print(
+            f"Recommendation Coverage: "
+            f"{coverage:.2%}"
         )
 
     print("\nTraining recommender prepared.")
