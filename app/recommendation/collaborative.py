@@ -1,5 +1,6 @@
 import pandas as pd
 from sklearn.metrics.pairwise import cosine_similarity
+import argparse
 BOOKS_PATH = "data/processed/books_clean.csv"
 
 RATINGS_PATH = "data/processed/explicit_ratings.csv"
@@ -171,6 +172,19 @@ def recommend_for_user(
     return predictions[:top_n]
 
 def main():
+    parser = argparse.ArgumentParser(
+        description="User-based collaborative filtering recommender"
+    )
+
+    parser.add_argument(
+        "--user",
+        type=int,
+        default=None,
+        help="User-ID to generate recommendations for"
+    )
+
+    args = parser.parse_args()
+
     ratings, books = load_data()
 
     filtered = filter_ratings(
@@ -186,18 +200,34 @@ def main():
         similarity_matrix
     )
 
-    sample_user = matrix.index[0]
+    if args.user is None:
+        user_activity = filtered.groupby("User-ID").size()
+        sample_user = user_activity.idxmax()
+
+        print(
+            f"No User-ID supplied. Using most active user: "
+            f"{sample_user}"
+        )
+    else:
+        sample_user = args.user
+
+    if sample_user not in matrix.index:
+        print(
+            f"User {sample_user} is not available in the "
+            "filtered collaborative-filtering dataset."
+        )
+        return
 
     recommendations = recommend_for_user(
-    sample_user,
-    matrix,
-    user_similarity,
-    top_n=10,
-    neighbor_count=20,
-    min_support=3
+        sample_user,
+        matrix,
+        user_similarity,
+        top_n=10,
+        neighbor_count=20,
+        min_support=3
     )
 
-    print(f"Recommendations for User {sample_user}")
+    print(f"\nRecommendations for User {sample_user}")
     print("=" * 70)
 
     for isbn, predicted_rating, support in recommendations:
@@ -214,7 +244,6 @@ def main():
                 f"Predicted Rating: {predicted_rating:.2f} | "
                 f"Neighbor Support: {support}"
             )
-
 
 if __name__ == "__main__":
     main()
