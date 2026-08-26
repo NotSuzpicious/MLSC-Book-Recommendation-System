@@ -13,6 +13,7 @@ BUDGET = 10000
 POPULATION_SIZE = 50
 GENERATIONS = 100
 MUTATION_RATE = 0.02
+RANDOM_SEED = 42
 
 
 def prepare_candidates():
@@ -228,6 +229,7 @@ def summarize_solution(best_individual, candidates):
     return selected_books, total_cost, total_score
 
 def main():
+    random.seed(RANDOM_SEED)
     candidates = prepare_candidates()
 
     best_individual, best_fitness = run_genetic_algorithm(
